@@ -515,10 +515,6 @@ public:
                         ptr->parent->key.erase(ptr->parent->key.begin()+pos4);
                     }
 
-                    int po = findPos(ptr->parent->key,p);
-                    if(ptr->key.size() != 0 && ptr->key[po] == p){
-                        ptr->parent->key.erase(ptr->parent->key.begin()+po);
-                    }
 
                     if(ptr->rightSib && ptr->rightSib->rightSib){
                         ptr->rightSib = ptr->rightSib->rightSib;
