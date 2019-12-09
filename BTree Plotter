@@ -427,25 +427,35 @@ public:
 
             if(ptr->leftSib && ptr->leftSib->key.size() > min){
 
-                ptr->key.insert(ptr->key.begin(),ptr->leftSib->key[ptr->leftSib->key.size()-1]);
-                ptr->leftSib->key.pop_back();
+                if(ptr->parent == root){
+                    int pos7 = findPos(root->key,item);
+                    ptr->key.insert(ptr->key.begin(),root->key[pos7]);
+                    root->key.erase(root->key.begin()+pos7);
+                    root->key.insert(root->key.begin()+pos7,ptr->leftSib->key[ptr->leftSib->key.size()-1]);
+                    ptr->children.insert(ptr->children.begin(),ptr->leftSib->children[ptr->leftSib->children.size()-1]);
+                    ptr->leftSib->children.erase(ptr->leftSib->children.end());
+                    
+                }else{
+                    ptr->key.insert(ptr->key.begin(),ptr->leftSib->key[ptr->leftSib->key.size()-1]);
+                    ptr->leftSib->key.pop_back();
 
-                int pos1 = findPos(ptr->parent->key,ptr->key[0]);
-                ptr->parent->key.insert(ptr->parent->key.begin()+pos1,ptr->key[0]);
+                    int pos1 = findPos(ptr->parent->key,ptr->key[0]);
+                    ptr->parent->key.insert(ptr->parent->key.begin()+pos1,ptr->key[0]);
 //                ptr->leftSib->key.pop_back();
 //                if(ptr->parent->key[ptr->parent->key.size()-1] == item){
 //                    ptr->key.insert(ptr->key.begin(),ptr->parent->key[pos1]);
 //
 //                }else{
 //                    ptr->key.push_back(ptr->parent->key[ptr->parent->key.size()-1]);
-                //}
+                    //}
 
 //                ptr->parent->key.pop_back();
 
-                if(hasChildren(ptr->leftSib)){
-                    ptr->children.insert(ptr->children.begin(),ptr->leftSib->children[ptr->leftSib->children.size()-1]);
-                    ptr->children[0]->parent = ptr;
-                    ptr->leftSib->children.pop_back();
+                    if(hasChildren(ptr->leftSib)){
+                        ptr->children.insert(ptr->children.begin(),ptr->leftSib->children[ptr->leftSib->children.size()-1]);
+                        ptr->children[0]->parent = ptr;
+                        ptr->leftSib->children.pop_back();
+                    }
                 }
             }
 
