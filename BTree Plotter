@@ -62,6 +62,7 @@ private:
 
     //element that last visited
     node* last_visited = nullptr;
+    node* keyPtr = nullptr;
 
 public:
 
@@ -324,10 +325,9 @@ public:
     }
 
     node* searchDelete(int x, SDL_Plotter * g=nullptr, const bool* deletion=nullptr) {
+        keyPtr = nullptr;
         node* v = root;
         bool isKey = false;
-        int posOfKey;
-        node * keyPtr = nullptr;
         int i;
         while (v) {
             for (i = 0; i < v->key.size() && x >= v->key[i] ; i++){
@@ -349,16 +349,11 @@ public:
                 }
                 if (x == v->key[i]) {
                     if(v->isleaf){
-                        if(isKey && v->key.size()>1){
-                            keyPtr->key[posOfKey]=v->key[1];
-                        }
                         last_visited = v;
                         return v;
                     }
                     else{
-                        isKey = true;
                         keyPtr = v;
-                        posOfKey = i;
                     }
                 }
             }
@@ -368,7 +363,6 @@ public:
             }else{
                 return nullptr;
             }
-            i = 0;
         }
         return nullptr;
 
@@ -379,6 +373,14 @@ public:
             return false;
         }else if(!hasChildren(root)){
             int pos = findPosDelete(root->key, item);
+            stringstream ss;
+            string message;
+            ss << "DELETING ";
+            ss << item;
+            message = ss.str();
+            plotNumber(message, 1, point(1200, 25), *g, color(0, 0, 0));
+            g->update();
+            g->Sleep(500);
             if(pos==-1){
                 return false;
             }
@@ -389,7 +391,7 @@ public:
                 bool deletion = true;
                 y = searchDelete(item, g, &deletion);
             }else{
-                y = searchDelete(item);
+                y = searchDelete(item, nullptr, nullptr);
             }
             if(!y){
                 return false;
@@ -400,16 +402,35 @@ public:
             if(last_visited->key.size() <min){
                 solveUnderFlow(last_visited,item);
             }
+            if(keyPtr){
+                cout << "hi" << endl;
+                if(keyPtr->key[findPos(keyPtr->key, item)]==item){
+                    node * temp = findClosestValue(item);
+                    keyPtr->key[findPos(keyPtr->key, item)]= temp->key[findPos(findClosestValue(item)->key, item)];
+                }
+            }
         }
     }
 
-   void solveUnderFlow(node* ptr,int item){
+    node* findClosestValue(int x) {
+        node* v = root;
+        int i;
+        while (v) {
+            if (!hasChildren(v)) {
+                return v;
+            }
+            for (i = 0; i < v->key.size() && x >= v->key[i] ; i++){}
+            last_visited = v;
+            v = v->children[i];
+        }
+    }
+
+    void solveUnderFlow(node* ptr,int item){
         int min = ceil((static_cast<double>(order)/2.0))-1;
         bool newRoot = false;
 
 
         while(!newRoot && (ptr->key.size() < min || ptr->children.size() == ptr->key.size())){
-            //this->levelOrder(cout);
             int x = findPos(ptr->key,item);
 
 
@@ -429,12 +450,14 @@ public:
 
                 if(ptr->parent == root){
                     int pos7 = findPos(root->key,item);
-                    ptr->key.insert(ptr->key.begin(),root->key[pos7]);
-                    root->key.erase(root->key.begin()+pos7);
-                    root->key.insert(root->key.begin()+pos7,ptr->leftSib->key[ptr->leftSib->key.size()-1]);
+                    ptr->key.insert(ptr->key.begin(),root->key[pos7-1]);
+                    root->key.erase(root->key.begin()+pos7-1);
+                    root->key.insert(root->key.begin()+pos7-1,ptr->leftSib->key[ptr->leftSib->key.size()-1]);
                     ptr->children.insert(ptr->children.begin(),ptr->leftSib->children[ptr->leftSib->children.size()-1]);
-                    ptr->leftSib->children.erase(ptr->leftSib->children.end());
-                    
+                    ptr->children[0]->parent = ptr;
+                    ptr->leftSib->children.pop_back();
+                    ptr->leftSib->key.pop_back();
+
                 }else{
                     ptr->key.insert(ptr->key.begin(),ptr->leftSib->key[ptr->leftSib->key.size()-1]);
                     ptr->leftSib->key.pop_back();
@@ -1076,7 +1099,7 @@ public:
                     }
                 }
                 if(queue1.front()==ptr){
-                    drawNode(plotter, queue1.front(), point(x, y), color(RED));
+                    drawNode(plotter, queue1.front(), point(x, y), color(50, 100, 150));
                 }else{
                     drawNode(plotter, queue1.front(), point(x, y), color(0, 0, 0));
                 }
