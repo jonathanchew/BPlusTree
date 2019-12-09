@@ -455,10 +455,11 @@ public:
 
                     int pos5 = findPos(ptr->parent->key,ptr->rightSib->key[0]);
                     ptr->rightSib->key.erase(ptr->rightSib->key.begin());
+
                     ptr->parent->key.erase(ptr->parent->key.begin()+pos5);
                     ptr->parent->key.insert(ptr->parent->key.begin()+pos5,ptr->rightSib->key[0]);
 
-                    if(ptr->key.size() == 1){
+                    if(ptr->key.size() == 1 && pos5-1>=0){
                         ptr->parent->key.insert(ptr->parent->key.begin()+pos5,ptr->key[0]);
                     }
 
